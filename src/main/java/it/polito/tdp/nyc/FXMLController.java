@@ -1,8 +1,13 @@
 package it.polito.tdp.nyc;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+
+import it.polito.tdp.nyc.model.Adiacenza;
 import it.polito.tdp.nyc.model.Model;
+import it.polito.tdp.nyc.model.Zona;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -11,6 +16,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 public class FXMLController {
 
@@ -32,19 +38,19 @@ public class FXMLController {
     private Button btnCreaLista; // Value injected by FXMLLoader
 
     @FXML // fx:id="clPeso"
-    private TableColumn<?, ?> clPeso; // Value injected by FXMLLoader
+    private TableColumn<Adiacenza, Integer> clPeso; // Value injected by FXMLLoader
 
     @FXML // fx:id="clV1"
-    private TableColumn<?, ?> clV1; // Value injected by FXMLLoader
+    private TableColumn<Adiacenza, String> clV1; // Value injected by FXMLLoader
 
     @FXML // fx:id="clV2"
-    private TableColumn<?, ?> clV2; // Value injected by FXMLLoader
+    private TableColumn<Adiacenza, String> clV2; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbBorough"
-    private ComboBox<?> cmbBorough; // Value injected by FXMLLoader
+    private ComboBox<String> cmbBorough; // Value injected by FXMLLoader
 
     @FXML // fx:id="tblArchi"
-    private TableView<?> tblArchi; // Value injected by FXMLLoader
+    private TableView<Adiacenza> tblArchi; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtDurata"
     private TextField txtDurata; // Value injected by FXMLLoader
@@ -58,11 +64,30 @@ public class FXMLController {
     @FXML
     void doAnalisiArchi(ActionEvent event) {
     
+    	String b= cmbBorough.getValue();
+    	if(b==null) {
+    		txtResult.appendText("seleziona un borgo per creare il grafo");
+    		return;
+    	}
+    	
+    	List<Adiacenza> result= this.model.getArchiPesoMinore();
+    	txtResult.appendText("#Archi trovati= "+result.size()+"\n");
+    	txtResult.appendText("peso medio= "+this.model.pesoMedio()+"\n");
+    	tblArchi.setItems(FXCollections.observableArrayList(result));
+    	
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-    
+    	txtResult.clear();
+    	String b= cmbBorough.getValue();
+    	if(b==null) {
+    		txtResult.appendText("seleziona un borgo per creare il grafo");
+    		return;
+    	}
+    	String result=this.model.creaGrafo(b);
+    	txtResult.appendText(result+"\n");
+    	
     }
 
     @FXML
@@ -84,12 +109,14 @@ public class FXMLController {
         assert txtProb != null : "fx:id=\"txtProb\" was not injected: check your FXML file 'Scene.fxml'.";
         assert txtResult != null : "fx:id=\"txtResult\" was not injected: check your FXML file 'Scene.fxml'.";
 
-       
-
+        clV1.setCellValueFactory(new PropertyValueFactory<Adiacenza, String>("z1Name"));
+        clV2.setCellValueFactory(new PropertyValueFactory<Adiacenza, String>("z2Name"));
+        clPeso.setCellValueFactory(new PropertyValueFactory<Adiacenza, Integer>("peso"));
     }
     
     public void setModel(Model model) {
     	this.model = model;
+    	this.cmbBorough.getItems().addAll(this.model.getBorghi());
     }
 
 }
