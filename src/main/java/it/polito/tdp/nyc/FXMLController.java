@@ -6,7 +6,6 @@ import java.util.ResourceBundle;
 
 import it.polito.tdp.nyc.model.Adiacenza;
 import it.polito.tdp.nyc.model.Model;
-import it.polito.tdp.nyc.model.Zona;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -87,7 +86,6 @@ public class FXMLController {
     	}
     	String result=this.model.creaGrafo(b);
     	txtResult.appendText(result+"\n");
-    	
     }
 
     @FXML

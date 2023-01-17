@@ -17,13 +17,14 @@ import it.polito.tdp.nyc.db.NYCDao;
 public class Model {
 
 	private NYCDao dao;
-	private Graph<Zona, DefaultWeightedEdge> grafo;
-	private List<Zona> zoneList;
+	private Graph<String, DefaultWeightedEdge> grafo;
+	private List<String> zoneList;
 	private List<Adiacenza> adiacenzeList;
 	
 	public Model() {
 		super();
 		this.dao = new NYCDao();
+		this.adiacenzeList=new ArrayList<>();
 	}
 
 	public List<String> getBorghi() {
@@ -36,20 +37,23 @@ public class Model {
 		zoneList=  this.dao.getZonaBorgo(borgo);
 		Graphs.addAllVertices(this.grafo, zoneList);
 		//aggiungo archi
-		adiacenzeList=this.dao.getArchi(borgo);
-		for (Adiacenza a: adiacenzeList) {
-			Graphs.addEdgeWithVertices(this.grafo, a.getZ1(), a.getZ2(), a.getPeso());
+		for (Adiacenza a: this.dao.getArchi(borgo)) {
+			if(!grafo.containsEdge(a.getZ2Name(), a.getZ1Name()) &&
+					a.getPeso()>0) {
+				Graphs.addEdgeWithVertices(this.grafo, a.getZ1Name(), a.getZ2Name(), a.getPeso());
+				adiacenzeList.add(a);
+			}
 		}
 		
 		return "Grafo creato #Vertici: "+this.grafo.vertexSet().size()+"#Archi: "+this.grafo.edgeSet().size();
 	}
 	
-	public Set <Zona> getVertici(){
+	public Set <String> getVertici(){
 		return this.grafo.vertexSet();
 	}
 	
-	public int pesoMedio() {
-		int media =0;
+	public double pesoMedio() {
+		double media =0;
 		int pesoTot=0;
 		for(Adiacenza a: adiacenzeList) {
 			pesoTot+= a.getPeso();
@@ -60,7 +64,7 @@ public class Model {
 	
 	public List<Adiacenza> getArchiPesoMinore(){
 		List<Adiacenza> result= new ArrayList<>() ;
-		int media = pesoMedio();
+		double media = pesoMedio();
 		for(Adiacenza a: adiacenzeList) {
 			if(a.getPeso()<media) {
 				result.add(a);
